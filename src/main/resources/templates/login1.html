@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>登录</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/jquery-validation/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/jquery-validation/localization/messages_zh.min.js"></script>
+    <script type="text/javascript" src="/layer/layer.js"></script>
+    <script type="text/javascript" src="/js/md5.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+<style>
+    /*body {*/
+    /*    background-color: #F0F0F0;*/
+    /*}*/
+    .container {
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="login-form">
+        <form name="loginForm" id="loginForm" method="post" style="width:50%; margin:0 auto">
+            <h2 style="text-align:center; margin-bottom: 20px">用户登录</h2>
+            <div class="form-group">
+                <div class="row">
+                    <label class="form-label col-md-5">请输入手机号码</label>
+                    <div class="col-md-5">
+                        <input id="mobile" name="mobile" class="form-control" type="text" placeholder="手机号码"
+                               required="true" minlength="11" maxlength="11"/>
+                    </div>
+                    <div class="col-md-1">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label class="form-label col-md-5">请输入密码</label>
+                    <div class="col-md-5">
+                        <input id="password" name="password" class="form-control" type="password" placeholder="密码"
+                               required="true" minlength="6" maxlength="16"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <button class="btn btn-second btn-block" type="submit" onclick="login()">登录</button>
+                </div>
+                <p>还没账号？<a href="#" id="register-link">点击注册</a></p>
+                <p id="login-error-message" class="text-danger"></p>
+            </div>
+        </form>
+    </div>
+    <div id="register-form" style="display: none;">
+        <form style="max-width: 400px; margin: 0 auto;">
+            <h2 class="text-center mb-4">注册</h2>
+            <div class="form-group">
+                <label for="id">手机号</label>
+                <input type="tel" class="form-control" id="id" name="id" pattern="[0-9]{11}" required>
+            </div>
+            <div class="form-group">
+                <label for="nickname">昵称</label>
+                <input type="text" class="form-control" id="nickname" name="nickname" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" class="form-control" id="registerPassword" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">确认密码</label>
+                <input type="password" class="form-control" id="confirm-password" name="confirm-password" required>
+            </div>
+            <button type="submit" class="btn btn-second btn-block">注册</button>
+            <div class="text-center mt-4">
+                已经有账号？<a href="#" id="login-link">点击登录</a>
+            </div>
+            <p id="register-error-message" class="text-danger text-center mt-3"></p>
+        </form>
+    </div>
+</div>
+</body>
+<script>
+    $(function() {
+        $('#register-form form').submit(function(e) {
+            e.preventDefault();
+            var passwordInput = $('#registerPassword').val();
+            var confirmPasswordInput = $('#confirm-password').val();
+            if ($('#id') === null || $('#nickname') === null){
+                $('#register-error-message').text('请填充完整表单！');
+                return;
+            }
+
+            if (passwordInput !== confirmPasswordInput) {
+                $('#register-error-message').text('确认密码与密码不一致！');
+                return;
+            }
+
+            if (!passwordInput || !confirmPasswordInput) {
+                $('#register-error-message').text('请输入密码和确认密码！');
+                return;
+            }
+            var salt = "1a2b3c4d";
+            var str = "" + salt.charAt(0) + salt.charAt(2) + passwordInput + salt.charAt(5) + salt.charAt(4);
+            var password = md5(str);
+            $.ajax({
+                type: 'POST',
+                url: '/smseckill/register',
+                data: {
+                    id: $("#id").val(),
+                    nickname: $("#nickname").val(),
+                    password: password
+                },
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('注册成功！');
+                        window.location.href = "/smseckill/toLogin";
+                    } else {
+                        alert('注册失败！');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#register-error-message').text(xhr.responseText);
+                }
+            });
+        });
+
+        $('#register-link').click(function(e) {
+            e.preventDefault();
+            $('#register-form').show();
+            $('#login-form').hide();
+        });
+
+        $('#login-link').click(function(e) {
+            e.preventDefault();
+            $('#login-form').show();
+            $('#register-form').hide();
+        });
+    });
+
+        function login() {
+        $("#loginForm").validate({
+            submitHandler: function (form) {
+                doLogin();
+            }
+        });
+    }
+
+    function doLogin() {
+        g_showLoading();
+        var inputPass = $("#password").val();
+        var salt = g_passsword_salt;
+        var str = "" + salt.charAt(0) + salt.charAt(2) + inputPass + salt.charAt(5) + salt.charAt(4);
+        var password = md5(str);
+
+        $.ajax({
+            url: "/smseckill/doLogin",
+            type: "POST",
+            data: {
+                mobile: $("#mobile").val(),
+                password: password
+            },
+            success: function (data) {
+                layer.closeAll();
+                if (data.code === 200) {
+                    console.log(data)
+                    layer.msg("成功");
+                    if (data.obj === 'admin') {
+                        window.location.href="/smseckill/admin";
+                    } else if (data.obj === 'consumer') {
+                        window.location.href = "/smseckill/index";
+                    } else {
+                        alert("恶意用户，禁止登陆")
+                    }
+                } else {
+                    layer.msg(data.msg);
+                }
+            },
+            error: function () {
+                layer.closeAll();
+            }
+        });
+    }
+</script>
+</html>

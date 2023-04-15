@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&display=swap">
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            /*background-color: #f9f9f9;*/
+            background-color: #ebeff8;
+        }
+
+        .container {
+            border: 1px solid #ccc;
+            background-color: #ffffff;
+            margin-top: 30px;
+            border-radius: 5px;
+            box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        hr {
+            border-top: 2px solid #ccc;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        .form-group label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .form-control {
+            background-color: #f2f2f2;
+            border-color: #f2f2f2;
+            color: #333;
+            font-size: 16px;
+            font-weight: 400;
+            box-shadow: none;
+            border-radius: 5px;
+        }
+
+        .showImg {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 575.98px) {
+            .container {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container mt-5">
+    <h2>Order Details</h2>
+    <hr>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="orderId">Order ID</label>
+                <input type="text" class="form-control" id="orderId" readonly>
+            </div>
+            <div class="form-group">
+                <label for="userId">User ID</label>
+                <input type="text" class="form-control" id="userId" readonly>
+            </div>
+            <div class="form-group">
+                <label for="orderCreateTime">Order Date</label>
+                <input type="text" class="form-control" id="orderCreateTime" readonly>
+            </div>
+            <div class="form-group">
+                <label for="orderStatus">Order Status</label>
+                <input type="text" class="form-control" id="orderStatus" readonly>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="goodsId">Product ID</label>
+                <input type="text" class="form-control" id="goodsId" readonly>
+            </div>
+            <div class="form-group">
+                <label for="goodsName">Product Name</label>
+                <input type="text" class="form-control" id="goodsName" readonly>
+            </div>
+            <div class="form-group">
+                <label for="goodsImg">Product Image</label>
+                <span id="goodsImg"></span>
+            </div>
+            <div class="form-group">
+                <label for="goodsPrice">Product Price</label>
+                <input type="text" class="form-control" id="goodsPrice" readonly>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" th:src="@{/js/common.js}"></script>
+
+<script>
+    $(function () {
+        const orderId = getOrderIdFromUrl();
+        $.ajax({
+            url: `/getOrder/?orderId=${orderId}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function (order) {
+                $('#orderId').val(order.orderId);
+                $('#userId').val(order.userId);
+                $('#goodsId').val(order.goodsId);
+                $('#goodsName').val(order.name);
+                var imgSrc = encodeURI(order.img);
+                $('#goodsImg').html('<img class="showImg" style=" position:relative; left: 40px; width: 80px;height: 80px" src="/' + imgSrc + '"></img>');
+                $('#goodsPrice').val(`¥${order.price.toFixed(2)}`);
+                $('#orderCreateTime').val(formatTime(order.createDate));
+                var status = (order.status === 1) ? 'Success' : 'Cancelled';
+                $('#orderStatus').val(status);
+            },
+            error: function () {
+                alert('Failed to get order details');
+            }
+        });
+
+        function getOrderIdFromUrl() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var orderId = urlParams.get('orderId');
+            if (orderId == null) {
+                alert('Order ID required');
+                return;
+            }
+            return orderId;
+        }
+    })
+</script>
+</body>
+
+</html>

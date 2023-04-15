@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.seckill.smseckill.mapper.GoodsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.seckill.smseckill.entity.Goods">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="title" property="title" />
+        <result column="img" property="img" />
+        <result column="detail" property="detail" />
+        <result column="price" property="price" />
+        <result column="addtime" property="addtime" />
+        <result column="seckill_start_time" property="seckillStartTime" />
+        <result column="seckill_end_time" property="seckillEndTime" />
+        <result column="status" property="status" />
+        <result column="stock" property="stock" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, title, img, detail, price, addtime, seckill_start_time, seckill_end_time, status, stock
+    </sql>
+
+</mapper>

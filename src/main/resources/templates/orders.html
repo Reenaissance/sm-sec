@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>用户订单列表</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/common.js}"></script>
+    <style>
+        .bg-custom {
+            background-color: #292F36;
+        }
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .container {
+            margin-top: 20px;
+        }
+
+        h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .row {
+            margin-bottom: 20px;
+        }
+
+        .col-md-4 {
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .card-body {
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-custom">
+    <a class="navbar-brand" href="#" style="color: white">&nbsp;订单管理</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="/smseckill/index" style="color: white">商品模块</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/admin" style="color: white">管理员模块</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/orders" style="color: white">订单模块</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/profile" style="color: white">个人中心</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container">
+    <p></p>
+    <h2 class="text-center" style="font-size: 30px">系统订单列表</h2>
+    <div class="row" id="order-list">
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var userId = getUserIdFromCookie();
+        $.ajax({
+            url: '/getAllOrder',
+            type: 'GET',
+            success: function (data) {
+                if(data.length === 0){
+                    alert("当前系统没有订单")
+                }else{
+                    data.forEach(function (order) {
+                        var status = (order.status === 0) ? '取消' :'成功';
+                        var card = '<div class="col-md-4">' +
+                            '<div class="card">' +
+                            '<div class="card-header">订单号：' + order.orderId + '</div>' +
+                            '<div class="card-body">' +
+                            '<p>价格：' + order.price + '</p>' +
+                            '<p>下单时间：' + formatTime(order.createDate) + '</p>' +
+                            '<p>下单商品：' + order.name + '</p>' +
+                            '<p>下单状态：' + order.status + '</p>' +
+                            '<button class="btn btn-sm btn-outline-secondary"  onclick="getDetail(\''+ order.orderId +'\')">详情</button>'+
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                        $('#order-list').append(card);
+                    })
+                }
+            },
+            error: function () {
+                alert('获取订单数据失败！');
+            }
+        });
+    });
+
+    function getUserIdFromCookie() {
+        var cookieStr = document.cookie;
+        var cookies = cookieStr.split("; ");
+        for (var i = 0; i < cookies.length; i++) {
+            var arr = cookies[i].split("=");
+            if (arr[0] == "userId") {
+                return arr[1];
+            }
+        }
+    };
+    function getDetail(orderId) {
+        window.location.href="/toOrderDetail?orderId=" + orderId;
+    }
+</script>
+</body>
+</html>

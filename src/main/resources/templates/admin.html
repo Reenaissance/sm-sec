@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员界面</title>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-datetimepicker.min.css"/>
+    <script src="/bootstrap/js/bootstrap-datetimepicker.min.js"></script>
+</head>
+<style>
+    #add-preview {
+        max-width: 200px;
+        max-height: 200px;
+    }
+    #update-preview {
+        max-width: 200px;
+        max-height: 200px;
+    }
+    .bg-custom {
+        background-color: #292F36;
+    }
+    .btn-primary {
+        background-color: #047dff;
+    }
+    body {
+        /*background-color: rgba(211, 215, 230, 0.98);*/
+    }
+</style>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-custom">
+    <a class="navbar-brand" href=" " style="color: white">管理员界面</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/index">主页</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/admin">商品管理</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/user">用户管理</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/auditLog">操作记录</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/profile">个人中心</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                    data-target="#add-modal" id="add-modal-show">
+                Add Goods
+            </button>
+        </div>
+        <div class="col-md-9">
+            <form id="search-form" class="form-inline my-2 my-lg-0 float-right">
+                <input class="form-control mr-sm-2" type="search" id="search-keyword" placeholder="Search ID/Name" aria-label="Search">
+                <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead  style="background-color: #f9f9f9">
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>标题</th>
+                        <th>详情</th>
+                        <th>图片</th>
+                        <th>价格</th>
+                        <th style="width: 120px">添加时间</th>
+                        <th style="width: 125px">秒杀开始时间</th>
+                        <th style="width: 125px">秒杀结束时间</th>
+                        <th>库存</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="goods-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Goods Modal -->
+<div class="modal fade" id="add-modal" tabindex="-1" role="dialog" aria-labelledby="add-modal-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add-modal-label">添加商品</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add-form">
+                    <div class="mb-3">
+                        <label for="add-id" class="form-label">编号</label>
+                        <input type="text" class="form-control" id="add-id" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-name">名称</label>
+                        <input type="text" class="form-control" id="add-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-title">标题</label>
+                        <input type="text" class="form-control" id="add-title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="add-detail" class="form-label">商品详情</label>
+                        <textarea class="form-control" id="add-detail" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-img">商品图片</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="add-img" name="img" accept="image/*" required>
+                        </div>
+                        <!-- 显示商品图片的预览区域 -->
+                        <div class="form-group">
+                            <div id="add-preview-container">
+                                <img id="add-preview" src="" alt="商品图片预览">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-price">商品价格</label>
+                        <div class="input-group">
+                            <span class="input-group-text">¥</span>
+                            <input type="number" class="form-control" id="add-price" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-status">秒杀状态</label>
+                        <select class="form-control" id="add-status" name="status">
+                            <option value="0">未开始</option>
+                            <option value="1">进行中</option>
+                            <option value="2">已结束</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-start-time">秒杀开始时间</label>
+                        <input type="text" class="form-control datetimepicker" id="add-start-time" placeholder="选择秒杀开始时间">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-end-time">秒杀结束时间</label>
+                        <input type="text" class="form-control datetimepicker" id="add-end-time" placeholder="选择秒杀结束时间">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-stock">商品库存</label>
+                        <input type="number" class="form-control" id="add-stock" name="add-stock">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 修改商品的模态框 -->
+<div class="modal fade" id="update-modal" tabindex="-1" aria-labelledby="update-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="update-modal-title">修改商品</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update-form">
+                    <div class="mb-3">
+                        <label for="update-id" class="form-label">商品编号</label>
+                        <input type="text" class="form-control" id="update-id" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="update-name" class="form-label">商品名称</label>
+                        <input type="text" class="form-control" id="update-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="update-title" class="form-label">商品标题</label>
+                        <input type="text" class="form-control" id="update-title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="update-detail" class="form-label">商品详情</label>
+                        <textarea class="form-control" id="update-detail" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="update-price" class="form-label">商品价格</label>
+                        <div class="input-group">
+                            <span class="input-group-text">¥</span>
+                            <input type="number" class="form-control" id="update-price" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-status">秒杀状态</label>
+                        <select class="form-control" id="update-status" name="status">
+                            <option value="0">未开始</option>
+                            <option value="1">进行中</option>
+                            <option value="2">已结束</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-img">商品图片</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="update-img" name="img" accept="image/*" required>
+                        </div>
+                        <div class="form-group">
+                            <div id="update-preview-container">
+                                <img id="update-preview" src="" alt="商品图片预览">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-start-time">秒杀开始时间</label>
+                        <input type="text" class="form-control datetimepicker" id="update-start-time" placeholder="选择秒杀开始时间">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-end-time">秒杀结束时间</label>
+                        <input type="text" class="form-control datetimepicker" id="update-end-time" placeholder="选择秒杀结束时间">
+                    </div>
+                    <div class="mb-3">
+                        <label for="update-stock" class="form-label">商品库存</label>
+                        <input type="number" class="form-control" id="update-stock" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateGoods()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<script>
+    $(document).ready(function() {
+        loadGoods();
+        $('#add-form').on('submit', function(e) {
+            e.preventDefault();
+            addGoods();
+        });
+        // 初始化日期选择器
+        $('.datetimepicker').datetimepicker({
+            format: 'yyyy-mm-dd hh:ii:ss',
+            autoclose: true,
+            todayBtn: true,
+            language: 'zh-CN',
+            minView: 0,
+            startDate: new Date(),
+            minuteStep: 1
+        })
+    });
+    function renderGoods(goodsData){
+        var html = '';
+        for (var i = 0; i < goodsData.length; i++) {
+            var goods = goodsData[i];
+            var status = (goods.status === 0) ? '未开始' : (goods.status === 1) ? '进行中':'已结束';
+            html += '<tr>';
+            html += '<td>' + goods.id + '</td>';
+            html += '<td>' + goods.name + '</td>';
+            html += '<td>' + goods.title + '</td>';
+            html += '<td>' + goods.detail + '</td>';
+            const img = encodeURI(goods.img)
+            html += '<td><div><img class ="img-thumbnail" src=/' + img + '></div></td>'
+            html += '<td>¥' + goods.price + '</td>';
+            html += '<td>' + formatTime(goods.addtime) + '</td>';
+            html += '<td>' + goods.seckillStartTime + '</td>';
+            html += '<td>' + goods.seckillEndTime + '</td>';
+            html += '<td>' + goods.stock + '</td>';
+            html += '<td>' + status + '</td>';
+            html += '<td>';
+            html += '<button class="btn btn-sm btn-outline-secondary btn-edit" data-toggle="modal"\n' +
+                '                    data-target="#update-modal" data-id="' + goods.id + '">编辑</button>';
+            html += '<button class="btn btn-sm btn-outline-secondary delete-btn" data-id="' + goods.id + '">删除</button>';
+            html += '</td>';
+            html += '</tr>';
+        }
+        $('#goods-table-body').html(html);
+    }
+    function loadGoods() {
+        // 获取商品列表数据
+        $.ajax({
+            url: '/goods/adminList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (goodsData) {
+                renderGoods(goodsData)
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    };
+    // 搜索功能
+    $('#search-form').submit(function(event) {
+        event.preventDefault();
+        const keyword = $('#search-keyword').val();
+        console.log(keyword)
+        $.ajax({
+            url: '/goods/search',
+            type: 'GET',
+            data: {
+                keyword: keyword
+            },
+            success: function(data) {
+                renderGoods(data)
+            },
+            error: function() {
+                alert('获取商品失败');
+            }
+        });
+    });
+    // 添加商品模态框
+    $('#add-modal-show').click(() => {
+        $.ajax({
+            url: '/goods/max-id',
+            type: 'GET',
+            success: function(data) {
+                const newId = data + 1;
+                $('#add-modal #add-id').val(newId);
+                $('#add-modal').modal('show');
+            },
+            error: function(xhr) {
+                console.log(xhr);
+            }
+        });
+    });
+    $('#add-modal').on('hidden.bs.modal', function (event) {
+        const form = $(this).find('form')[0];
+        $('#add-preview').attr('src', '').hide();
+        form.reset();
+    });
+
+    $('#add-img').on('change', function () {
+        const file = $(this).get(0).files[0];
+        if (!file) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function () {
+            $('#add-preview').attr('src', reader.result);
+        };
+        reader.readAsDataURL(file);
+    });
+    function addGoods() {
+        const id = $('#add-id').val().trim();
+        const name = $('#add-name').val().trim();
+        const title = $('#add-title').val().trim();
+        const detail = $('#add-detail').val().trim();
+        const price = parseFloat($('#add-price').val().trim());
+        const status = $('#add-status').val().trim();
+        const stock = parseInt($('#add-stock').val().trim());
+        const imgFile = $('#add-img')[0].files[0];
+        const seckillStart = $('#add-start-time').val();
+        const seckillEnd = $('#add-end-time').val();
+
+        if (!id || !name || !title || !detail || !price || !seckillStart || !seckillEnd || !stock || !imgFile || !status) {
+            alert('请填写完整信息！');
+            return;
+        }
+        if (seckillStart > seckillEnd) {
+            alert('请填写正确的秒杀开始结束时间！');
+            return;
+        }
+        if (isNaN(price) || isNaN(stock)) {
+            alert('价格和库存必须是数字！');
+            return;
+        }
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(imgFile.type)) {
+            alert('图片格式不正确，请选择JPG、PNG或GIF格式的图片！');
+            return;
+        }
+        const formData = new FormData(document.getElementById('add-form'));
+        formData.append('isUpdate', false);
+        formData.append('id', id);
+        // formData.append('name', name);
+        // formData.append('title', title);
+        formData.append('detail', detail);
+        formData.append('price', price);
+        formData.append('stock', stock);
+        formData.append('status',status)
+        formData.append('img', imgFile);
+        formData.append('seckillStartTime', seckillStart);
+        formData.append('seckillEndTime', seckillEnd);
+        $.ajax({
+            type: 'POST',
+            url: '/goods/update',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                alert('添加商品成功')
+                $('#add-modal').modal('hide');
+                loadGoods();
+            },
+            error: function (err) {
+                alert('添加商品失败');
+                console.error(err);
+            }
+        });
+    }
+
+    // 删除功能
+    $('#goods-table-body').on('click', '.delete-btn', function () {
+        const id = $(this).data('id');
+        if (confirm('确定要删除该商品吗？')) {
+            $.ajax({
+                url: '/goods/delete/' + id,
+                type: 'DELETE',
+                success: function () {
+                    loadGoods();
+                },
+                error: function () {
+                    alert('删除商品失败，请重试！');
+                }
+            });
+        }
+    });
+    // 获取商品信息并填充到表单中
+    function fillUpdateForm(goods) {
+        $('#update-id').val(goods.id);
+        $('#update-name').val(goods.name);
+        $('#update-title').val(goods.title);
+        $('#update-detail').val(goods.detail);
+        $('#update-price').val(goods.price);
+        $('#update-stock').val(goods.stock);
+        $('#update-status').val(goods.status);
+        $('#update-start-time').val(goods.seckillStartTime)
+        $('#update-end-time').val(goods.seckillEndTime)
+
+        $('#update-start-time').datetimepicker({
+            format: 'yyyy-mm-dd hh:ii:ss',
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            startDate: new Date(),
+            defaultDate: new Date($('#update-start-time')),
+        });
+
+        $('#update-end-time').datetimepicker({
+            format: 'yyyy-mm-dd hh:ii:ss',
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            startDate: new Date(),
+            defaultDate: new Date($('#update-end-time')),
+        });
+    };
+    $('#update-img').on('change', function () {
+        const file = $(this).get(0).files[0];
+        if (!file) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function () {
+            $('#update-preview').attr('src', reader.result);
+        };
+        reader.readAsDataURL(file);
+    });
+    $('#update-modal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data('id');
+        $.ajax({
+            url: '/goods/get/' + id,
+            type: 'GET',
+            success: function (data) {
+                fillUpdateForm(data);
+
+            },
+            error: function () {
+                alert('获取商品信息失败，请重试！');
+            }
+        });
+    });
+    $('#update-modal').on('hidden.bs.modal', function (event) {
+        const form = $(this).find('form')[0];
+        $('#update-preview').attr('src', '').hide();
+        form.reset();
+    });
+    function updateGoods() {
+        const id = $('#update-id').val().trim();
+        const name = $('#update-name').val().trim();
+        const title = $('#update-title').val().trim();
+        const detail = $('#update-detail').val().trim();
+        const price = parseFloat($('#update-price').val().trim());
+        const status = $('#update-status').val();
+        const stock = parseInt($('#update-stock').val().trim());
+        const img =  $('#update-img').get(0).files[0];
+        const seckillStart = $('#update-start-time').val();
+        const seckillEnd = $('#update-end-time').val();
+        if (!id || !name || !title || !detail || !price || !seckillStart || !seckillEnd || !stock || !img || !status) {
+            alert('请填写完整信息！');
+            return;
+        }
+        console.log(seckillStart)
+        console.log(seckillEnd)
+        if (seckillStart > seckillEnd) {
+            alert('请填写正确的秒杀开始结束时间！');
+            return;
+        }
+        if (isNaN(price) || isNaN(stock)) {
+            alert('价格和库存必须是数字！');
+            return;
+        }
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(img.type)) {
+            alert('图片格式不正确，请选择JPG、PNG或GIF格式的图片！');
+            return;
+        }
+        const formData = new FormData(document.getElementById('update-form'));
+        formData.append('isUpdate', true);
+        formData.append('id', id);
+        formData.append('name', name);
+        formData.append('title', title);
+        formData.append('detail', detail);
+        formData.append('price', price);
+        formData.append('stock', stock);
+        formData.append('status',status)
+        formData.append('img', img);
+        formData.append('seckillStartTime', seckillStart);
+        formData.append('seckillEndTime', seckillEnd);
+        $.ajax({
+            type: 'POST',
+            url: '/goods/update',
+            data: formData,
+            // 自动将formData对象转换为合适的格式
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                alert('修改商品成功');
+                $('#update-modal').modal('hide');
+                loadGoods();
+            },
+            error: function (err) {
+                alert('修改商品失败');
+                console.error(err);
+            }
+        });
+    }
+
+</script>

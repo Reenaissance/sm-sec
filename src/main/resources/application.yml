@@ -1,0 +1,73 @@
+spring:
+    resources:
+        static-locations: classpath:/static/
+        add-mappings: true
+        cache:
+          cachecontrol:
+              max-age: 3600
+        chain:
+            cache: true
+            enabled: true
+            compressed: true
+            html-application-cache: true
+    #  解决找不到模板位置的警告
+    freemarker:
+        check-template-location: false
+    thymeleaf:
+        cache: false
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+#        url: jdbc:mysql://192.168.244.128:3306/seckill?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://localhost:3306/seckill?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+        username: root
+        password: root
+        # 连接池
+        hikari:
+            pool-name: SeckillHikariCP
+            minimum-idle: 5
+            idle-timeout: 180000
+            maximum-pool-size: 10
+            auto-commit: true
+            max-lifetime: 180000
+            connection-timeout: 30000
+            connection-test-query: SELECT 1
+    redis:
+#        host: 192.168.244.128
+        host: localhost
+        port: 6379
+        database: 0
+        timeout: 10000ms
+        lettuce:
+            pool:
+                max-active: 8
+                max-wait: 10000ms
+                max-idle: 8
+                min-idle: 5
+    rabbitmq:
+        host: localhost
+        ussername: guest
+        password: guest
+        virtual-host: /
+        port: 5672
+        listener:
+          simple:
+              concurrency: 10
+              max-concurrency: 10
+              prefetch: 1
+              auto-startup: true
+              default-requeue-rejected: true
+        template:
+          retry:
+              enabled: true
+              initial-interval: 1000ms
+              max-attempts: 3
+              max-interval: 10000ms
+              multiplier: 1
+    
+    mybatis-plus:
+        mapper-locations: classpath*:/mapper/*Mapper.xml
+        type-alias-package: com.seckill.smseckill.pojo
+    logging:
+        level:
+            com.seckill.smseckill.mapper: debug
+        

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>管理员操作日志</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <style>
+        .bg-custom {
+            background-color: #292F36;
+        }
+        body {
+            background-color: #F0F0F0;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-custom">
+    <a class="navbar-brand" href=" " style="color: white">管理员界面</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/index">主页</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/admin">商品管理</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/user">用户管理</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/auditLog">操作记录</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" style="color: white" href="/smseckill/profile">个人中心</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container">
+    <p></p>
+    <h3 class="text-center">管理员操作日志</h3>
+    <p></p>
+    <div class="form-row justify-content-center">
+        <div class="col-auto">
+            <input type="date" id="startDate" class="form-control">
+        </div>
+        <div class="col-auto">
+            <input type="date" id="endDate" class="form-control">
+        </div>
+        <div class="col-auto">
+            <input type="text" id="operator" class="form-control" placeholder="管理员">
+        </div>
+        <div class="col-auto">
+            <button id="searchBtn" class="btn btn-primary">查询</button>
+        </div>
+    </div>
+    <table class="table table-striped mt-3" id="logTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>管理员</th>
+            <th>操作</th>
+            <th>时间</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+</body>
+<script>
+    $(function () {
+        $.ajax({
+            url: '/logs',
+            type: 'GET',
+            data: {
+                startDate: "",
+                endDate: "",
+                userId: null
+            },
+            success: function (data) {
+                $('#logTable tbody').empty();
+                if (data.length == 0) {
+                    $('#logTable tbody').append('<tr><td colspan="4" class="text-center">暂时没有数据</td></tr>');
+                } else {
+                    $.each(data, function (index, item) {
+                        var row = '<tr><td>' + item.id + '</td><td>' + item.userId + '</td><td>' + item.operation + '</td><td>' + formatTime(item.timestamp) + '</td></tr>';
+                        $('#logTable tbody').append(row);
+                    });
+                }
+            },
+            error: function () {
+                alert('获取全部记录失败');
+            }
+        });
+        $('#searchBtn').click(function () {
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var operator = $('#operator').val();
+            $.ajax({
+                url: '/logs',
+                type: 'GET',
+                data: {
+                    startDate: startDate,
+                    endDate: endDate,
+                    userId: operator
+                },
+                success: function (data) {
+                    $('#logTable tbody').empty();
+                    if (data.length == 0) {
+                        $('#logTable tbody').append('<tr><td colspan="4" class="text-center">没有符合条件的数据</td></tr>');
+                    } else {
+                        $.each(data, function (index, item) {
+                            var row = '<tr><td>' + item.id + '</td><td>' + item.userId + '</td><td>' + item.operation + '</td><td>' + formatTime(item.timestamp) + '</td></tr>';
+                            $('#logTable tbody').append(row);
+                        });
+                    }
+                },
+                error: function () {
+                    alert('查询失败');
+                }
+            });
+        });
+    });
+</script>
+</html>

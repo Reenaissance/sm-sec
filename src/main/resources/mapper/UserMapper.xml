@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.seckill.smseckill.mapper.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.seckill.smseckill.entity.User">
+        <id column="keyId" property="keyId" />
+        <result column="id" property="id" />
+        <result column="nickname" property="nickname" />
+        <result column="role" property="role" />
+        <result column="password" property="password" />
+        <result column="salt" property="salt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        keyId, id, nickname, role, password, salt
+    </sql>
+
+
+</mapper>

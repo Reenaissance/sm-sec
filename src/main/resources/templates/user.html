@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>黑名单管理</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background-color: #F0F0F0;
+        }
+
+        .container-fluid {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel-left, .panel-right {
+            height: 600px;
+            font-size: 14px;
+        }
+
+        .panel-left {
+            background-color: #EAEAEA;
+        }
+
+        .panel-right {
+            background-color: #F8F8F8;
+        }
+
+        .panel-body {
+            overflow-y: auto;
+        }
+
+        .form-search {
+            margin-bottom: 10px;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .btn-danger, .btn-success {
+            font-size: 12px;
+        }
+        .bg-custom {
+            background-color: #292F36;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-custom">
+    <a class="navbar-brand" href=" " style="color: white">管理员界面</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/index" style="color: white">主页</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/admin" style="color: white">商品管理</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/user" style="color: white">用户管理</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/auditLog" style="color: white">操作记录</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto" style="float: right">
+            <li class="nav-item">
+                <a class="nav-link" href="/smseckill/profile" style="color: white">个人中心</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4 col-md-push-6 panel-right">
+            <h3 class="text-center">黑名单</h3>
+            <label for="searchBlacklisted"></label>
+            <form id="blacklisted-form" class="form-inline" style="position: relative; left: 130px">
+                <input class="form-control mr-sm-2" type="search" id="searchBlacklisted" placeholder="Search UserID"
+                       aria-label="Search">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </form>
+
+            <div class="panel-body">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>记录 ID</th>
+                        <th>用户 ID</th>
+                        <th>原因</th>
+                        <th>时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="blacklistTable">
+                    <!--                    <tr>-->
+                    <!--                        <td>005</td>-->
+                    <!--                        <td>-->
+                    <!--                            <button class="btn btn-success pull-right" onclick="removeFromBlacklist('005')">激活-->
+                    <!--                            </button>-->
+                    <!--                        </td>-->
+                    <!--                    </tr>-->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-4 col-md-pull-2 panel-left">
+            <h3 class="text-center">白名单</h3>
+            <label for="searchNotBlacklisted"></label>
+            <form id="notBlacklisted-form" class="form-inline" style="position: relative; left: 130px">
+                <input class="form-control mr-sm-2" type="search" id="searchNotBlacklisted" placeholder="Search ID"
+                       aria-label="Search">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </form>
+            <div class="panel-body">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>用户 ID</th>
+                        <th>用户 NickName</th>
+                        <th>用户 状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="notBlacklistedTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        $.ajax({
+            type: 'GET',
+            url: '/api/findAllBlack',
+            success: function (record) {
+                if (record.length > 0) {
+                    $('#blacklistTable').empty();
+                    record.forEach(function (record) {
+                        var rowHtml = '<tr>' +
+                            '<td>' + record.id + '</td>' +
+                            '<td>' + record.userId + '</td>' +
+                            '<td>' + record.reason + '</td>' +
+                            '<td>' + record.createTime + '</td>' +
+                            '<td><button class="btn btn-danger pull-right" onclick="removeFromBlacklist(' + record.userId + ')">激活</button></td>' +
+                            '</tr>';
+                        $('#blacklistTable').append(rowHtml);
+                    });
+                } else {
+                    alert('没有拉黑记录');
+                }
+            },
+            error: function () {
+                alert('获取失败');
+            }
+        });
+
+        $('#blacklisted-form').submit(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'GET',
+                url: '/api/findBlack',
+                data: {
+                    userId: $('#searchBlacklisted').val()
+                },
+                success: function (record) {
+                    if (record) {
+                        var rowHtml = '<tr>' +
+                            '<td>' + record.id + '</td>' +
+                            '<td>' + record.userId + '</td>' +
+                            '<td>' + record.reason + '</td>' +
+                            '<td>' + record.createTime + '</td>' +
+                            '<td><button class="btn btn-danger pull-right" onclick="removeFromBlacklist(' + record.userId + ')">激活</button></td>' +
+                            '</tr>';
+                        $('#blacklistTable').html(rowHtml);
+                    } else {
+                        alert('找不到该拉黑记录');
+                    }
+                },
+                error: function () {
+                    alert('查询失败');
+                }
+            });
+        });
+        $('#notBlacklisted-form').submit(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'GET',
+                url: '/smseckill/findUser/',
+                data: {
+                    id: $('#searchNotBlacklisted').val()
+                },
+                success: function (user) {
+                    if (user) {
+                        var rowHtml = '<tr>' +
+                            '<td>' + user.id + '</td>' +
+                            '<td>' + user.nickname + '</td>' +
+                            '<td>' + user.role + '</td>' +
+                            '<td><button class="btn btn-danger pull-right" onclick="addToBlacklist(' + user.id + ')">拉黑</button></td>' +
+                            '</tr>';
+                        $('#notBlacklistedTable').html(rowHtml);
+                    } else {
+                        alert('找不到该用户');
+                    }
+                },
+                error: function () {
+                    alert('查询失败');
+                }
+            });
+        });
+    });
+    function addToBlacklist(userId) {
+        if (confirm('确定拉黑？')) {
+            var reason = prompt('请填写加入黑名单的原因：');
+            if (reason !== null) {
+                $.ajax({
+                    url: '/api/black',
+                    method: 'POST',
+                    data: {
+                        userId: userId,
+                        reason: reason
+                    },
+                    success: function (response) {
+                        alert('已将该用户加入黑名单！');
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        alert(xhr.responseText);
+                    }
+                });
+            }
+        }
+        // 删除未拉黑名单中的该用户
+        $('#searchNotBlacklisted').val('');
+        var row = $('td:contains(' + userId + ')').parent();
+        row.remove();
+
+        // 将该用户加入已拉黑名单
+        $('#blacklistTable > tbody:last-child').append(
+            '<tr>' +
+            '<td>' + userId + '</td>' +
+            '<td><button class="btn btn-success pull-right" onclick="removeFromBlacklist(\'' + userId + '\')">激活</button></td>' +
+            '</tr>'
+        );
+    }
+
+    // 将用户从黑名单中移除
+    function removeFromBlacklist(userId) {
+        if (confirm('确定激活？')) {
+            $.ajax({
+                url: '/api/notBlack/' + userId,
+                type: 'DELETE',
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert('激活失败，请重试！');
+                }
+            });
+
+            // 删除已拉黑名单中的该用户
+            $('#searchBlacklisted').val('');
+            var row = $('td:contains(' + userId + ')').parent();
+            row.remove();
+
+            // 将该用户加入未拉黑名单
+            $('#notBlacklistedTable > tbody:last-child').append(
+                '<tr>' +
+                '<td>' + userId + '</td>' +
+                '<td><button class="btn btn-danger pull-right" onclick="addToBlacklist(\'' + userId + '\')">拉黑</button></td>' +
+                '</tr>'
+            );
+        }
+    }
+</script>
+</body>
+</html>
